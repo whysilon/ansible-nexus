@@ -1,0 +1,11 @@
+---
+dest_folder: /home/ansible
+org_name: ATSD
+country_code: SG
+country: Singapore
+cert_folder: "{{dest_folder}}/SSL/certs"
+int_folder: "{{dest_folder}}/SSL/intermediate"
+nexus_container_name: nexus
+nginx_container_name: nginx
+default_pw: test
+...
