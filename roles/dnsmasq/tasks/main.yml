@@ -1,0 +1,4 @@
+- name: "Apply DNSMasq Template"
+  template:
+    src: hosts
+    dest: /etc/hosts

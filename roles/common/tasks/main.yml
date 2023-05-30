@@ -1,0 +1,27 @@
+---
+- name: "Set up yum utils"
+  yum: 
+    name: yum-utils
+    state: present
+- name: "Add docker repository into yum"
+  command: sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+- name: "Uninstall runc" #Runc causes dependency issues
+  command: sudo yum remove runc -y
+- name: "Install Docker"
+  yum:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+- name: "Start Docker"
+  command: "systemctl start docker"
+- name: "Verify Docker" #Set up error catching
+  command: "docker run hello-world"
+- name: "Install cryptography"
+  yum:
+    name: python3-cryptography
+    state: present
+...
