@@ -1,0 +1,19 @@
+---
+- name: "Make nginx-config directory"
+  command: "mkdir {{dest_folder}}/nginx-configs"
+  ignore_errors: true
+- name: "Copy over nginx configration files"
+  copy:
+    src: "{{role_path}}/files/nginx-configs/"
+    dest: "{{dest_folder}}/nginx-configs"
+- name: Apply nginx template
+  template:
+    src: nginx.j2
+    dest: "{{dest_folder}}/nginx-configs/nginx.conf"
+- name: Apply docker compose template
+  template:
+    src: docker-compose.j2
+    dest: "{{dest_folder}}/docker-compose.yaml"
+- name: Run Docker Compose
+  command: "docker compose -f {{dest_folder}}/docker-compose.yaml up -d"
+...

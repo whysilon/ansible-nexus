@@ -1,0 +1,27 @@
+services:
+  nexus:
+    image: sonatype/nexus3:latest
+    container_name: {{nexus_container_name}}
+    expose:
+     - 8081
+    networks:
+      nexus:
+        aliases:
+          - nexus
+  nginx:
+    image: nginx:latest
+    container_name: {{nginx_container_name}}
+    ports:
+      - 80:80
+      - 443:8443
+    volumes:
+      - {{dest_folder}}/nginx-configs:/etc/nginx
+      - {{dest_folder}}/SSL/certs:/etc/ssl/custom_certs
+    networks:
+      nexus:
+        aliases:
+          - nginx-rp
+
+networks:
+  nexus:
+    driver: bridge

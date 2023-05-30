@@ -1,0 +1,31 @@
+---
+  - name: "Get the randomly generated password"  
+    command: "sudo docker exec {{nexus_container_name}} cat /nexus-data/admin.password"
+    register: "admin_pw"
+    ignore_errors: true
+  - name: "Change the randomly generated password to default"
+    uri:
+      url: https://{{ansible_host}}/service/rest/v1/security/users/admin/change-password
+      method: PUT
+      headers:
+        Content-Type: text/plain
+      body: "{{default_pw}}" #Should be a file that is connected to ansible-vault
+      user: admin
+      password: "{{admin_pw.stdout}}"
+      force_basic_auth: true
+      validate_certs: false
+      return_content: true
+      status_code: [204, 200]
+    ignore_errors: true
+  - name: "Change anonymous settings"
+    uri:
+      url: "https://{{ansible_host}}/service/rest/v1/security/anonymous"
+      method: PUT
+      body_format: json
+      body: '{"enabled" : "false"}'
+      user: "admin"
+      password: "{{default_pw}}" 
+      force_basic_auth: true
+      validate_certs: false
+      status_code: 200
+...
