@@ -1,0 +1,46 @@
+---
+- name: Make directory to store ansible files
+  command: mkdir {{dest_folder}}
+  ignore_errors: true
+- name: Make directory to store ssl-related files
+  command: mkdir {{int_folder}} {{cert_folder}}
+  ignore_errors: true
+- name: "Generate Private Key"
+  community.crypto.openssl_privatekey:
+    path: "{{cert_folder}}/{{domain_name}}.key.pem"
+    size: 2048
+    mode: '400'
+    return_content: true
+- name: "Copy over intermediate key"
+  copy:
+    src: "{{role_path}}/files/ca/intermediate/private/intermediate.key.pem"
+    dest: "{{int_folder}}/intermediate.key.pem"
+- name: "Copy over intermediate cert"
+  copy:
+    src: "{{role_path}}/files/ca/intermediate/certs/intermediate.cert.pem"
+    dest: "{{int_folder}}/intermediate.cert.pem"
+- name: "Generate Certificate Signing Request"
+  community.crypto.openssl_csr:
+    countryName: "{{country_code}}"
+    organizationName: "{{org_name}}"
+    stateOrProvinceName: "{{country}}"
+    CN: "{{domain_name}}"
+    path: "{{cert_folder}}/{{domain_name}}.csr.pem"
+    privatekey_path: "{{cert_folder}}/{{domain_name}}.key.pem"
+    subject_alt_name:
+      - DNS:{{domain_name}}
+      - DNS:{{ansible_host}} 
+- name: "Generate SSL Certificate"
+  community.crypto.x509_certificate:
+    csr_path: "{{cert_folder}}/{{domain_name}}.csr.pem"
+    ownca_path: "{{int_folder}}/intermediate.cert.pem"
+    ownca_privatekey_path: "{{int_folder}}/intermediate.key.pem"
+    ownca_privatekey_passphrase: 12345678 # Need to use ansible vault for safety
+    path: "{{cert_folder}}/{{domain_name}}.cert.pem"
+    ownca_not_after: "+375d"
+    provider: "ownca"
+- name: "Copy the certificate chain to certs"
+  copy:
+    src: /home/user/ansible-nexus/roles/openssl/files/ca/intermediate/certs/ca-chain.cert.pem
+    dest: "{{cert_folder}}/ca-chain.cert.pem"
+...
