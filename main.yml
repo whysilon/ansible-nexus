@@ -1,0 +1,18 @@
+---
+- name: Initialise a Nexus Container with SSL termination nginx proxy container
+  hosts: nexus_containers
+  roles:
+    - role: common
+      become: true
+    - role: openssl
+      become: true
+    - role: docker-run
+      become: true
+    - role: nexus-setup
+      become: true
+- name: "Apply DNSmasq Template"
+  hosts: localhost
+  become: true
+  roles:
+    - dnsmasq
+...
